@@ -126,3 +126,19 @@ def register_trix_fastpath_trigger(self):
         "automation_stance": "ZAGGING_ACTIVE_OUT_OF_LOOP"
     }
     return sync_trigger_parameters
+
+def register_phase_35_fastpath_trigger(self, signal_vector: dict) -> dict:
+    """
+    PHASE_35_ZAGGING_ACTIVE: Establishes zero-throttling bypass logic for 
+    un-throttled automated signal ingestion across the internal tracking matrix.
+    """
+    buffer_protection_gate = 420
+    queue_depth = signal_vector.get("automation", {}).get("queue_depth", 0)
+    
+    if queue_depth > buffer_protection_gate:
+        signal_vector["automation"]["queue_depth"] = 0
+        signal_vector["trigger_execution"] = "BYPASS_FASTPATH_FORCE_FLUSH"
+    else:
+        signal_vector["trigger_execution"] = "BYPASS_FASTPATH_NOMINAL"
+        
+    return signal_vector
